@@ -4,15 +4,32 @@ import { Request, RequestInit, RequestInfo, Response } from 'node-fetch';
 // Start writing Firebase Functions
 // https://firebase.google.com/docs/functions/typescript
 
-export const test = functions.https.onRequest((request, response) => {
-    getData<StatusData>()
-        .then(data => {
-            response.send(data);
-        })
-        .catch(err => {
-            console.error(err);
-            response.send("Error: " + err)
-        });
+export const getStatus = functions.https.onRequest(async (request, response) => {
+    const args: RequestInit = { method: "GET"}
+    const path = url + "/status";
+    const data = await http<StatusData>(new Request(path, args));
+
+    try {
+        let out = data.parsedBody!;
+        response.send(out);
+    } catch (err) {
+        console.error(err);
+        response.send("Error: " + err)
+    }
+});
+
+export const startMC = functions.https.onRequest(async (request, response) => {
+    const args: RequestInit = { method: "POST", body: "" }
+    const path = url + "/start";
+    const data = await http<actionData>(new Request(path, args));
+
+    try {
+        let out = data.parsedBody!;
+        response.send(out);
+    } catch (err) {
+        console.error(err);
+        response.send("Error: " + err)
+    }
 });
 
 const url = "https://gamocosm.com/servers/" + functions.config().gamocosm.id + "/api/" + functions.config().gamocosm.key;
@@ -31,10 +48,10 @@ interface StatusData {
     download: string;
 }
 
-const getData = async <T>(args: RequestInit = { method: "get" }): Promise<IHttpResponse<T>> => {
-    const path = url + "/status";
-    return await http<T>(new Request(path, args));
-};
+interface actionData {
+    error: string;
+}
+
 
 const http = <T>(request: RequestInfo): Promise<IHttpResponse<T>> => {
     return new Promise((resolve, reject) => {
