@@ -4,75 +4,81 @@ import { Request, RequestInit, RequestInfo, Response } from 'node-fetch';
 // Start writing Firebase Functions
 // https://firebase.google.com/docs/functions/typescript
 
-export const getStatus = functions.https.onRequest(async (request, response) => {
-    const args: RequestInit = { method: "GET" }
-    const path = url + "/status";
-    const data = await http<StatusData>(new Request(path, args));
+export const getStatus = functions.https.onRequest(async (req, res) => {
 
-    try {
-        let out = data.parsedBody!;
-        response.send(out);
-    } catch (err) {
-        console.error(err);
-        response.send("Error: " + err)
-    }
+	const args: RequestInit = { method: "GET" }
+	const path = url + "/status";
+	try {
+		const statusData = await http<StatusData>(new Request(path, args));
+		let out = statusData.parsedBody!;
+		console.log(out);
+		res.status(200).json(out);
+	} catch (err) {
+		console.error(err);
+		res.status(500).send(err);
+	}
 });
 
-export const startMC = functions.https.onRequest(async (request, response) => {
-    const args: RequestInit = { method: "POST", body: "" }
-    const path = url + "/start";
-    const data = await http<actionData>(new Request(path, args));
-    let out = data.parsedBody!;
+export const startMC = functions.https.onCall(async (data, context) => {
+	const args: RequestInit = { method: "POST", body: "" }
+	const path = url + "/start";
+	try {
+		const actionData = await http<actionData>(new Request(path, args));
+		let out = actionData.parsedBody!;
 
-    if (out == null) {
-        response.send(out);
-    } else {
-        console.error(out);
-        response.send("Error: " + out.error)
-    }
+		if (out == null) {
+			return { status: "success" };
+		} else {
+			console.error(out);
+			return { status: "Error: " + out.error };
+		}
+	} catch (error) {
+		return "";
+	}
+
 });
 
 const url = "https://gamocosm.com/servers/" + functions.config().gamocosm.id + "/api/" + functions.config().gamocosm.key;
 
 interface IHttpResponse<T> extends Response {
-    parsedBody?: T;
+	parsedBody?: T;
 }
 
 // example consuming code 
 interface StatusData {
-    server: boolean;
-    status: string;
-    minecraft: boolean;
-    ip: string;
-    domain: string;
-    download: string;
+	server: boolean;
+	status: string;
+	minecraft: boolean;
+	ip: string;
+	domain: string;
+	download: string;
 }
 
 interface actionData {
-    error: string;
+	error: string;
 }
 
 
 const http = <T>(request: RequestInfo): Promise<IHttpResponse<T>> => {
-    return new Promise((resolve, reject) => {
-        let response: IHttpResponse<T>;
-        fetch(request)
-            .then(res => {
-                response = res;
-                return res.json();
-            })
-            .then(body => {
-                if (response.ok) {
-                    response.parsedBody = body;
-                    resolve(response);
-                } else {
-                    reject(response);
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                reject(err);
-            });
-    });
+	return new Promise((resolve, reject) => {
+		let response: IHttpResponse<T>;
+		fetch(request)
+			.then(res => {
+				response = res;
+				return res.json();
+			})
+			.then(body => {
+				if (response.ok) {
+					response.parsedBody = body;
+					resolve(response);
+				} else {
+					reject(response);
+				}
+			})
+			.catch(err => {
+				console.error(err);
+				reject(err);
+			});
+	});
 };
 

@@ -46,3 +46,16 @@ p {
 footer.page-footer {
   margin: 0;
 }
+
+#status {
+  font-size: 150%;
+  opacity: 0;
+  -webkit-transition: opacity 500ms linear;
+  transition: opacity 500ms linear;
+}
+
+#loading {
+  opacity: 1;
+  -webkit-transition: opacity 500ms linear;
+  transition: opacity 500ms linear;
+}
