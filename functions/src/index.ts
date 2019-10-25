@@ -1,6 +1,5 @@
 import * as functions from 'firebase-functions';
-import fetch from 'node-fetch';
-import { Request, RequestInit, RequestInfo, Response } from 'node-fetch';
+import fetch, { Request, RequestInit, RequestInfo, Response } from 'node-fetch';
 // Start writing Firebase Functions
 // https://firebase.google.com/docs/functions/typescript
 
@@ -9,7 +8,7 @@ export const getStatus = functions.https.onRequest(async (req, res) => {
 	const path = url + "/status";
 	try {
 		const statusData = await http<StatusData>(new Request(path, args));
-		let out = statusData.parsedBody!;
+		const out = statusData.parsedBody!;
 		console.log(out);
 		res.status(200).json(out);
 	} catch (err) {
@@ -22,8 +21,8 @@ export const startMC = functions.https.onRequest(async (req, res) => {
 	const args: RequestInit = { method: "POST", body: "" }
 	const path = url + "/start";
 	try {
-		const actionData = await http<actionData>(new Request(path, args));
-		let out = actionData.parsedBody!;
+		const actData = await http<actionData>(new Request(path, args));
+		const out = actData.parsedBody!;
 
 		if (out.error === null) {
 			res.status(200);

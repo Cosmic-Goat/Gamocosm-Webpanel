@@ -1,48 +1,58 @@
- document.addEventListener('DOMContentLoaded', function () {
-     var elems = document.querySelectorAll('.parallax');
-     var instances = M.Parallax.init(elems);
-     const loadingElement = document.getElementById("loading");
-     const statusElement = document.getElementById("status");
+const loadingHTML = '<div class="row center progress" style="width: 50%;"><div class = "indeterminate"></div></div>'
+const buttonHTML = '<a onclick="startServer()" class="btn-large waves-effect waves-light green lighten-1">Start Server</a>'
+var el;
+const fadeDuration = 500;
 
-     fetch('/getstatus')
-         .then(res => res.json())
-         .then(data => {
-             console.log(data);
-             let out;
-             loadingElement.style.opacity = 0;
+document.addEventListener('DOMContentLoaded', function () {
+    var elems = document.querySelectorAll('.parallax');
+    var instances = M.Parallax.init(elems);
 
-             setTimeout(() => {
+    el = document.getElementById("box");
 
-                 if (data.status !== null) {
-                     out = "Server is currently " + data.status + "!";
-                 } else if (data.server) {
-                     if (data.minecraft) {
-                         out = "Online with ip:\n" + data.domain;
-                     } else {
-                         out = "Server instance is up, but Minecraft is not currently running. Please try again in 30 seconds, or contact an administrator."
-                     }
-                 } else {
-                     out = "Server is offline."
-                     document.getElementById("start-button").style.opacity = 1;
+    fetch('/getstatus')
+        .then(res => res.json())
+        .then(data => {
+            let out;
 
-                 }
-                 loadingElement.disabled = true;
-                 statusElement.innerHTML = out;
-                 statusElement.style.opacity = 1;
-             }, 500)
+            if (data.status !== null) {
+                out = "Server is currently " + data.status + "!";
+            } else if (data.server) {
+                if (data.minecraft) {
+                    out = "Online with ip:\n" + data.domain;
+                } else {
+                    out = "Server instance is up, but Minecraft is not currently running. Please try again in 30 seconds, or contact an administrator.";
+                }
+            } else {
+                out = "Server is offline.<br>\n" + buttonHTML;
+            }
 
-         })
-         .catch(err => {
-             loadingElement.style.opacity = 0;
-             setTimeout(() => {
-                 statusElement.innerHTML = err;
-                 statusElement.style.opacity = 1;
-             }, 500);
-         });
- });
+            fade(out, fadeDuration);
+        })
+        .catch(err => {
+            fade("" + err, fadeDuration);
+        });
+});
 
- function startServer() {
-     document.getElementById("start-button").disabled = true;
-     fetch('/start')
-         .then(res => console.log(res));
- }
+function startServer() {
+    fade(loadingHTML, fadeDuration);
+    fetch('/start')
+        .then(res => {
+            if (res.status == 200) {
+                fade("Server starting up!", fadeDuration);
+            } else {
+                res.text()
+                    .then(text => fade("Error: " + text + ".", fadeDuration));
+            }
+        })
+        .catch(err => {
+            fade("" + err, fadeDuration);
+        });
+}
+
+function fade(html, speed) {
+    el.style.opacity = 0;
+    setTimeout(() => {
+        el.innerHTML = html;
+        el.style.opacity = 1;
+    }, speed);
+}

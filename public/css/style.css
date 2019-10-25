@@ -47,15 +47,9 @@ footer.page-footer {
   margin: 0;
 }
 
-#status {
+#box {
   font-size: 150%;
-  opacity: 0;
-  -webkit-transition: opacity 500ms linear;
-  transition: opacity 500ms linear;
-}
-
-#loading {
-  opacity: 1;
+  line-height: 300%;
   -webkit-transition: opacity 500ms linear;
   transition: opacity 500ms linear;
 }
