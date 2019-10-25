@@ -5,7 +5,6 @@ import { Request, RequestInit, RequestInfo, Response } from 'node-fetch';
 // https://firebase.google.com/docs/functions/typescript
 
 export const getStatus = functions.https.onRequest(async (req, res) => {
-
 	const args: RequestInit = { method: "GET" }
 	const path = url + "/status";
 	try {
@@ -19,21 +18,21 @@ export const getStatus = functions.https.onRequest(async (req, res) => {
 	}
 });
 
-export const startMC = functions.https.onCall(async (data, context) => {
+export const startMC = functions.https.onRequest(async (req, res) => {
 	const args: RequestInit = { method: "POST", body: "" }
 	const path = url + "/start";
 	try {
 		const actionData = await http<actionData>(new Request(path, args));
 		let out = actionData.parsedBody!;
 
-		if (out == null) {
-			return { status: "success" };
+		if (out.error === null) {
+			res.status(200);
 		} else {
 			console.error(out);
-			return { status: "Error: " + out.error };
+			res.status(500).send(out.error);
 		}
-	} catch (error) {
-		return "";
+	} catch (err) {
+		res.status(500).send(err);
 	}
 
 });

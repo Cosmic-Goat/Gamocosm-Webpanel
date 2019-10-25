@@ -8,29 +8,41 @@
          .then(res => res.json())
          .then(data => {
              console.log(data);
-             const out = "Online with ip:\n" + data.domain;
-
-
+             let out;
              loadingElement.style.opacity = 0;
 
-             setTimeout(function () {
-                 loadingElement.remove();
+             setTimeout(() => {
+
+                 if (data.status !== null) {
+                     out = "Server is currently " + data.status + "!";
+                 } else if (data.server) {
+                     if (data.minecraft) {
+                         out = "Online with ip:\n" + data.domain;
+                     } else {
+                         out = "Server instance is up, but Minecraft is not currently running. Please try again in 30 seconds, or contact an administrator."
+                     }
+                 } else {
+                     out = "Server is offline."
+                     document.getElementById("start-button").style.opacity = 1;
+
+                 }
+                 loadingElement.disabled = true;
                  statusElement.innerHTML = out;
                  statusElement.style.opacity = 1;
              }, 500)
 
+         })
+         .catch(err => {
+             loadingElement.style.opacity = 0;
+             setTimeout(() => {
+                 statusElement.innerHTML = err;
+                 statusElement.style.opacity = 1;
+             }, 500);
          });
-
-
-     // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-     // // The Firebase SDK is initialized and available here!
-     //
-     // firebase.auth().onAuthStateChanged(user => { });
-     // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-     // firebase.messaging().requestPermission().then(() => { });
-     // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-     //
-     // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-
-
  });
+
+ function startServer() {
+     document.getElementById("start-button").disabled = true;
+     fetch('/start')
+         .then(res => console.log(res));
+ }

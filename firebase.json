@@ -13,10 +13,13 @@
       "**/.*",
       "**/node_modules/**"
     ],
-    "rewrites": [
-      {
+    "rewrites": [{
         "source": "/getstatus",
         "function": "getStatus"
+      },
+      {
+        "source": "/start",
+        "function": "startMC"
       }
     ]
   }
